@@ -72,7 +72,7 @@ changeStatTab =
 ### Degree distribution  ####
 degDistTab = tabItem(tabName = "degdist",
                      h2("Network plot and degree distribution histogram here.")
-),
+)
 
 
 ### GWESP  ####
