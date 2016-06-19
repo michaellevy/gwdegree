@@ -58,26 +58,74 @@ changeStatTab =
             
             h3("Implication"),
             "The change in the log-odds of an edge is given by the 
-        product of the change statistic and the parameter value. 
-        So for positive GWD parameters,
-        edges that increase the change statistic more are more likely; conversely,
-        for negative GWD parameter values, edges that
-        increase the change statistic less are more likely. Note in the plot above that edges to nodes of low degree increase the statistic more.
-        This implies that positive GWD parameters reward edges to low-degree nodes, and negative GWD parameters reward edges to higher-degree nodes.
-        Therefore, ", strong("negative GWD parameter estimates are consistent with networks more centralized (i.e. with higher-variance degree distributions)
-                             than expected by chance, ", em("ceteris paribus"), ".")
+            product of the change statistic and the parameter value. 
+            So for positive GWD parameters,
+            edges that increase the change statistic more are more likely; conversely,
+            for negative GWD parameter values, edges that
+            increase the change statistic less are more likely. Note in the plot above that edges to nodes of low degree increase the statistic more.
+            This implies that positive GWD parameters reward edges to low-degree nodes, and negative GWD parameters reward edges to higher-degree nodes.
+            Therefore, ", strong("negative GWD parameter estimates are consistent with networks more centralized (i.e. with higher-variance degree distributions)
+            than expected by chance, ", em("ceteris paribus"), ".")
     )
 
 
 ### Degree distribution  ####
 degDistTab = tabItem(tabName = "degdist",
-                     h2("Network plot and degree distribution histogram here.")
+                     h2("Network plot and degree distribution histogram here."),
+                     "Some text to orient the user.",
+                     tags$br(), tags$br(),
+
+                     # Inputs
+                     ###### THESE NEED TO NOT BE SLIDERS -- THE COSTLY REACTIVE HAPPENS EACH TIME THE SLIDER LANDS.
+                     
+                     fluidRow(
+                         box(width = 6, title = HTML("&theta;<sub>GWD</sub>"),
+                             status = "primary", solidHeader = TRUE,
+                             sliderInput("gwd", label = NULL, ticks = TRUE,
+                                         min = -5, max = 5, value = -2, step = 0.1)),
+                         box(width = 6, title = HTML("&theta;<sub>S</sub> (aka \"decay\")"),
+                             status = "primary", solidHeader = TRUE,
+                             sliderInput("decay", label = NULL, ticks = TRUE,
+                                         min = 0, max = 5, value = 1.5, step = 0.1))
+                     ),
+                     
+                     fluidRow(
+                         box(width = 4, title = "Network Size",
+                             status = "primary", solidHeader = TRUE,
+                             sliderInput("netSize", 
+                                         label = NULL, ticks = FALSE,
+                                         min = 3, max = 1000, 
+                                         value = 50, step = 1)),
+                         box(width = 4, title = "Network Density",
+                             status = "primary", solidHeader = TRUE,
+                             sliderInput("netDensity", 
+                                         label = NULL, ticks = FALSE,
+                                         min = 0, max = 1, 
+                                         value = .05, step = .01)),
+                         box(width = 4, title = "Number Simulations",
+                             status = "primary", solidHeader = TRUE,
+                             sliderInput("reps", 
+                                         label = NULL, ticks = FALSE,
+                                         min = 1, max = 500, 
+                                         value = 10, step = 1))
+                     ),
+                     
+
+                     # Outputs
+                     
+                     ## Sample graph (visNet?)
+                     
+                     ## Degree Distribution
+                     fluidRow(
+                         box(status = "primary", plotOutput("degDistPlot"))
+                     )
 )
 
 
 ### GWESP  ####
 gwespTab = tabItem(tabName = "gwesp",
                    h2("Centralization and clustering heatmaps here.")
+                   
 )
 
 
@@ -118,6 +166,81 @@ server =
         output$statPlot = renderPlot({
             plotDeltaGWD(d = deltaGWDdf(), cols = decayColors)
         })
+        
+        
+        ### Degree Distribution ####
+        # Define five reactives. Will `networks` and other downstreams watch for changes in them and be reactive itself?
+        # gwd = reactive(input$gwd)
+        # decay = reactive(input$decay)
+        # netSize = reactive(input$netSize)
+        # netDensity = reactive(input$netDensity)
+        # reps = reactive(input$reps)
+        
+        degDists = reactive({
+            
+            networks = vector('list', 2L)
+            networks[[1]] = replicate(input$reps, makeRandomGraph(input$netSize, input$netDensity), simplify = FALSE)
+            
+            # Simulate networks
+            # Don't care about the ERGM estimates; so turn down the control parameters
+            # The edges term is there only to get the model to converge. Estimate is not used (edges constrained)
+            m = ergm(networks[[1]][[1]] ~ gwdegree(0, FALSE) + edges,
+                     control = control.ergm(MCMC.samplesize = 1e1, MCMLE.maxit = 1, 
+                                            loglik.control = control.logLik.ergm(nsteps = 1)))
+            coefs = coef(m)
+            coefs[1] = input$gwd
+            coefs[2] = input$decay
+            networks[[2]] = simulate(m, coef = coefs, constraints = ~edges, nsim = reps
+                                     # , control = control.simulate.ergm(MCMC.burnin = 1e4, 
+                                     #                               MCMC.interval = 1e4)
+            )
+            names(networks) = c('random', 'gwd')
+            # Calculate the degrees of each graph and make a freq table of each
+            # The factor levels is to include 0-counts
+            # Then take the median count of each degree
+            
+            dd = lapply(seq_along(networks), function(type) {
+                # type is stack of simulated graphs of a particular type
+                # Split into each simulation, tabulate degrees, and use `smartbind` to match on names (ie, degree)
+                deg = 
+                    degree(networks[[type]], g = 1:length(networks[[type]]), gmode = 'graph') %>% 
+                    split(., 1:ncol(.)) %>%
+                    lapply(table) %>%
+                    do.call(gtools::smartbind, .)
+                # Where smartbind fills with NA, there were no nodes of that degree, so replace with zero:
+                deg[is.na(deg)] = 0
+                
+                # Calculate median count for each degree and mean prob of each degree and organize in df
+                data.frame(degree = as.integer(colnames(deg)),
+                           meanFreq = apply(deg, MARGIN = 2, mean),
+                           type = names(networks[type]))
+                
+            }) %>%
+                do.call(rbind, .)
+        
+            # Fill in the degrees-never-found to keep box-widths constant
+            filled = expand.grid(
+                degree = 0:max(dd$degree),
+                type = names(networks)
+            )
+            filled = left_join(filled, dd, by = c("degree", "type"))
+            filled$meanFreq[is.na(filled$meanFreq)] = 0
+            filled
+            
+        })
+        
+        output$degDistPlot = renderPlot({
+            ggplot(degDists(), aes(x = degree, y = meanFreq, fill = type)) +
+                geom_bar(stat = 'identity', position = position_dodge(width = .25),
+                         alpha = .75, width = 1.2, color = 'black') +
+                ylab('Mean frequency') + xlab('Degree') +
+                xlim(c(0, NA)) + 
+                scale_fill_brewer(palette = 'BuPu', name = 'Network', 
+                                  labels = c('Random Graph', 'Chosen Parameters')) +
+                theme(legend.justification = c(1, 1), legend.position = c(1, 1))
+            
+        })            
+        
     })
 
 # Run the app  ####
