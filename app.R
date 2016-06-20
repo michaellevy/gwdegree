@@ -3,13 +3,14 @@ lapply(c('shiny', 'shinydashboard', 'statnet', 'ggplot2', 'dplyr', 'scales'),
 theme_set(theme_bw())
 source("functions.R")
 
+# colors
+gwdDecayOptions = list(3, 2, 1, .5, 0, -.5, -1)
+cols = structure(rev(RColorBrewer::brewer.pal(length(gwdDecayOptions) + 2, 'BuPu')[-1:-2]),
+                 names = unlist(gwdDecayOptions))
 
 # Tabs ####
 
 ### Change stat  ####
-gwdDecayOptions = list(3, 2, 1, .5, 0, -.5, -1)
-decayColors = structure(rev(RColorBrewer::brewer.pal(length(gwdDecayOptions) + 2, 'BuPu')[-1:-2]),
-                        names = unlist(gwdDecayOptions))
 changeStatTab = 
     tabItem(tabName = "stat",
             h2("GWDegree Statistic Behavior"),
@@ -20,21 +21,15 @@ changeStatTab =
                 column(width = 5,
                        box(width = NULL, title = HTML("&theta;<sub>S</sub> (aka \"decay\")"),
                            status = "primary", solidHeader = TRUE,
-                           # Slider for single decay value:
-                           # sliderInput("theta_s", step = 0.1,
-                           #             label = h4(HTML("&theta;<sub>S</sub> (aka \"decay\")")), 
-                           #             min = -1, max = 5, value = 1.5)
-                           
-                           # Checkboxes for multiple decay values:
                            checkboxGroupInput("theta_s", label = NULL, # h4(HTML("&theta;<sub>S</sub> (aka \"decay\")")),
                                               choices = gwdDecayOptions,
-                                              selected = gwdDecayOptions[unlist(gwdDecayOptions) >= 0])
+                                              selected = 1)  # gwdDecayOptions[unlist(gwdDecayOptions) >= 0])
                        ),
                        box(width = NULL, title = "Degree Range",
                            status = "primary", solidHeader = TRUE,
                            sliderInput("degreeRange", step = 1,
-                                       label = NULL, 
-                                       min = 0, max = 50, 
+                                       label = NULL, ticks = FALSE,
+                                       min = 0, max = 250, 
                                        value = c(0, 20))
                        )
                        
@@ -70,61 +65,60 @@ changeStatTab =
 
 
 ### Degree distribution  ####
-degDistTab = tabItem(tabName = "degdist",
-                     h2("Network plot and degree distribution histogram here."),
-                     "Some text to orient the user.
+degDistTab = 
+    tabItem(
+        tabName = "degdist",
+        h2("Network plot and degree distribution histogram here."),
+        "Some text to orient the user.
                      Simulations are costly. E.g. 50 replicates of a 500-node network
                      takes about a minute.",
-                     tags$br(), tags$br(),
-                     
-                     # Inputs
-                     fluidRow(
-                         box(width = 6, title = HTML("&theta;<sub>GWD</sub>"),
-                             status = "primary", solidHeader = TRUE,
-                             sliderInput("gwd", label = NULL, ticks = TRUE,
-                                         min = -5, max = 5, value = -2, step = 0.1)),
-                         box(width = 6, title = HTML("&theta;<sub>S</sub> (aka \"decay\")"),
-                             status = "primary", solidHeader = TRUE,
-                             sliderInput("decay", label = NULL, ticks = TRUE,
-                                         min = 0, max = 5, value = 1.5, step = 0.1))
-                     ),
-                     
-                     fluidRow(
-                         box(width = 4, title = "Network Size",
-                             status = "primary", solidHeader = TRUE,
-                             sliderInput("netSize", 
-                                         label = NULL, ticks = FALSE,
-                                         min = 3, max = 1000, 
-                                         value = 50, step = 1)),
-                         box(width = 4, title = "Network Density",
-                             status = "primary", solidHeader = TRUE,
-                             sliderInput("netDensity", 
-                                         label = NULL, ticks = FALSE,
-                                         min = 0, max = 1, 
-                                         value = .05, step = .01)),
-                         box(width = 4, title = "Number Simulations",
-                             status = "primary", solidHeader = TRUE,
-                             sliderInput("reps", 
-                                         label = NULL, ticks = FALSE,
-                                         min = 1, max = 500, 
-                                         value = 10, step = 1))
-                     ),
-                     
-                     fluidRow(
-                         box(title = "Run New Simulations", status = "primary",
-                             actionButton("simulate", label = "Go!"))
-                     ),
-                     
-                     
-                     # Outputs
-                     
-                     ## Sample graph (visNet?)
-                     
-                     ## Degree Distribution
-                     fluidRow(
-                         box(status = "primary", plotOutput("degDistPlot"))
-                     )
-)
+        tags$br(), tags$br(),
+        
+        # Inputs
+        fluidRow(
+            box(width = 4, title = "GWDegree Parameters",
+                status = "primary", solidHeader = TRUE,
+                sliderInput("gwd", label = HTML("&theta;<sub>GWD</sub>"), 
+                            ticks = FALSE,
+                            min = -5, max = 5, value = -3, step = 0.1),
+                # box(width = 6, title = HTML("&theta;<sub>S</sub> (aka \"decay\")"),
+                # status = "primary", solidHeader = TRUE,
+                sliderInput("decay", label = HTML("&theta;<sub>S</sub> (aka \"decay\")"), 
+                            ticks = FALSE,
+                            min = 0, max = 5, value = 2, step = 0.1)
+            ),
+            
+            box(width = 4, title = "Network Parameters",
+                status = "primary", solidHeader = TRUE,
+                sliderInput("netSize", 
+                            label = "Number of Nodes", ticks = FALSE,
+                            min = 5, max = 500, 
+                            value = 100, step = 5),
+                sliderInput("meanDegree", 
+                            label = "Average Degree", ticks = FALSE,
+                            min = 0, max = 10, 
+                            value = 3, step = .1)
+            ),
+            
+            box(width = 4, title = "Simulation Parameters",
+                status = "primary", solidHeader = TRUE,
+                sliderInput("reps", 
+                            label = "Number of Simulated Networks", ticks = FALSE,
+                            min = 10, max = 100, 
+                            value = 30, step = 1))
+        ),
+        
+        
+        # Outputs
+        
+        fluidRow(
+            ## Sample graphs (visNet?)
+            box(status = "primary", plotOutput("bothGraphs")),
+
+            ## Degree Distribution
+            box(status = "primary", plotOutput("degDistPlot"))
+        )
+    )
 
 
 ### GWESP  ####
@@ -142,7 +136,7 @@ header = dashboardHeader(title = "GW Degree")
 sidebar = 
     dashboardSidebar(sidebarMenu(
         menuItem("Statistic Behavior", tabName = "stat"),
-        menuItem("Parameter & Degree Distribution", tabName = "degdist"),
+        menuItem("Parameter & Degree Distribution", tabName = "degdist", selected = TRUE),
         menuItem("Confounded with GWESP", tabName = "gwesp")
     ))
 
@@ -162,38 +156,31 @@ ui = dashboardPage(header, sidebar, body)
 server =
     shinyServer(function(input, output) {
         
-        ### Change stat plot  ####
+        ### Change-statistic plot  ####
         deltaGWDdf = reactive({
             makeDeltaGWDdF(kmin = input$degreeRange[1],
                            kmax = input$degreeRange[2],
                            decay = as.numeric(input$theta_s))
         })
         output$statPlot = renderPlot({
-            plotDeltaGWD(d = deltaGWDdf(), cols = decayColors)
+            plotDeltaGWD(d = deltaGWDdf(), cols = cols)
         })
         
         
-        ### Degree Distribution ####
+        ### Degree Distribution plots ####
+        netCols = structure(cols[c(2, 5)], names = c("random", "gwd"))
+
+        #### Simulate many and plot degree distributions
         degDists = 
-            eventReactive(input$simulate, {
-                
-                
+            reactive({
                 networks = vector('list', 2L)
-                networks[[1]] = replicate(input$reps, makeRandomGraph(input$netSize, input$netDensity), simplify = FALSE)
+                networks[[1]] = replicate(input$reps, 
+                                          intergraph::asNetwork(igraph::erdos.renyi.game(input$netSize, input$netSize * input$meanDegree, "gnm")), 
+                                          simplify = FALSE)
                 
-                # Simulate networks
-                # Don't care about the ERGM estimates; so turn down the control parameters
-                # The edges term is there only to get the model to converge. Estimate is not used (edges constrained)
-                m = ergm(networks[[1]][[1]] ~ gwdegree(0, FALSE) + edges,
-                         control = control.ergm(MCMC.samplesize = 1e1, MCMLE.maxit = 1, 
-                                                loglik.control = control.logLik.ergm(nsteps = 1)))
-                coefs = coef(m)
-                coefs[1] = input$gwd
-                coefs[2] = input$decay
-                networks[[2]] = simulate(m, coef = coefs, constraints = ~edges, nsim = reps
-                                         # , control = control.simulate.ergm(MCMC.burnin = 1e4, 
-                                         #                               MCMC.interval = 1e4)
-                )
+                networks[[2]] = simulate.formula(networks[[1]][[1]] ~ gwdegree(input$decay, TRUE), coef = input$gwd,
+                                                 constraints = ~ edges,
+                                                 nsim = input$reps)
                 names(networks) = c('random', 'gwd')
                 # Calculate the degrees of each graph and make a freq table of each
                 # The factor levels is to include 0-counts
@@ -225,21 +212,29 @@ server =
                 )
                 filled = left_join(filled, dd, by = c("degree", "type"))
                 filled$meanFreq[is.na(filled$meanFreq)] = 0
-                filled
+                
+                list(dd = filled, random = networks[[1]][[1]], gwd = networks[[2]][[1]])
                 
             })
         
+        # Plot degree distributions
         output$degDistPlot = renderPlot({
-            ggplot(degDists(), aes(x = degree, y = meanFreq, fill = type)) +
+            ggplot(degDists()[["dd"]], aes(x = degree, y = meanFreq, fill = type)) +
                 geom_bar(stat = 'identity', position = position_dodge(width = .5),
                          alpha = .75, width = 1.2, color = 'black') +
                 ylab('Mean frequency') + xlab('Degree') +
                 xlim(c(0, NA)) + 
-                scale_fill_brewer(palette = 'BuPu', name = 'Network', 
+                scale_fill_manual(values = netCols, name = 'Network', 
                                   labels = c('Random Graph', 'Chosen Parameters')) +
                 theme(legend.justification = c(1, 1), legend.position = c(1, 1))
-            
         })            
+        
+        # Plot sample networks
+        output$bothGraphs = renderPlot({
+            par(mfrow = c(1, 2), mar = c(0, 0, 2, 0))
+            plotNet(degDists()[["random"]], netCols["random"], "Random Graph")
+            plotNet(degDists()[["gwd"]], netCols["gwd"], "Chosen Parameters")
+        })
         
     })
 

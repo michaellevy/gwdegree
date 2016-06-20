@@ -39,3 +39,15 @@ makeRandomGraph = function(nodes, density, directed = FALSE)
     add.edges(n, ed$V1, ed$V2)  
     n
 }
+
+plotNet = function(net, vCol, mtext) {
+    plot(net, 
+         vertex.col = vCol, 
+         pad = 0,
+         edge.col = 'gray', 
+         vertex.border = 'white',
+         vertex.lwd = .35,
+         vertex.cex = 4 - log10(network.size(net))
+         ) 
+    mtext(mtext)
+}
