@@ -51,3 +51,59 @@ plotNet = function(net, vCol, mtext) {
          ) 
     mtext(mtext)
 }
+
+simCCCent = function(gwdRange = c(-2, 2), gwespRange = c(-.5, .5),
+                     theta_s = 1.5, theta_t = .5, gridSize = 3, nsim = 1,
+                     netSize = 100, meanDegree = 3) {
+    
+    dfForSim = expand.grid(
+            gwd = seq(gwdRange[1], gwdRange[2], len = gridSize),
+            gwesp = seq(gwespRange[1], gwespRange[2], len = gridSize))
+    
+    N = intergraph::asNetwork(igraph::erdos.renyi.game(netSize, netSize * meanDegree, "gnm"))
+    
+    dfForSim = 
+        lapply(1:nrow(dfForSim), function(i) {
+            n = simulate.formula(N ~ gwdegree(theta_s, TRUE) + gwesp(theta_t, TRUE), 
+                                 coef = unlist(dfForSim[i, ]),
+                                 constraints = ~ edges,
+                                 nsim = nsim)
+            data.frame(
+                Centralization = mean(centralization(n, 'degree', mode = 'graph')),
+                ClusteringCoef = mean(clusteringCoef(n))
+            )
+        }) %>%
+        do.call(rbind, .) %>%
+        cbind(dfForSim, .)
+    
+    plotHeatmaps(dfForSim)
+    
+}
+
+clusteringCoef = function(net)
+    unname(3 * summary(net ~ triangles) / summary(net ~ twopath))
+
+plotHeatmaps = function(df) {
+    list(
+        cent = 
+            ggplot(df, aes(x = gwd, y = gwesp, fill = Centralization)) +
+            geom_raster(alpha = .7) +
+            scale_fill_gradientn(colours = topo.colors(1e3), name = 'Degree\ncentralization')+
+            # scale_fill_gradient2(name = 'Degree\ncentralization', mid = 'lightgray', 
+            #                      midpoint = strSims$Centralization[strSims$GWD == 0 & strSims$GWESP == 0]) +
+            xlab(expression(theta[GWD])) +
+            ylab(expression(theta[GWESP])) +
+            theme(aspect.ratio = 1),
+        
+        cc = 
+            ggplot(df, aes(x = gwd, y = gwesp, fill = ClusteringCoef)) +
+            geom_raster(alpha = .7) +
+            scale_fill_gradientn(colours = topo.colors(1e3), name = 'Clustering\nCoefficient')+
+            # scale_fill_gradient2(name = 'Clustering\nCoefficient', mid = 'lightgray', 
+            #                      midpoint = strSims$ClusteringCoef[strSims$GWD == 0 & strSims$GWESP == 0]) +
+            xlab(expression(theta[GWD])) +
+            ylab(expression(theta[GWESP])) +
+            theme(aspect.ratio = 1)
+    )
+# cowplot::plot_grid(cent, cc, labels = letters[1:2], align = 'vh')
+}
