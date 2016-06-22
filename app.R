@@ -18,7 +18,7 @@ changeStatTab =
             and it always increases more for edge added to a 
             lower-degree node than a higher-degree node. The implication is that for positive values of the corresponding 
             parameter (&theta;<sub>GWD</sub>), the likelihood of an edge on a lower-degree node is greater than an edge on a high-degree node.
-                 This is discussed in more detail below the charts.<br><br>
+                 This is discussed in more detail below.<br><br>
                  The second take-home point is that &theta;<sub>S</sub> should never be less than zero."),
             tags$br(), tags$br(),
             
@@ -134,7 +134,8 @@ degDistTab =
                             label = "Number of Simulated Networks", ticks = FALSE,
                             min = 10, max = 100, 
                             value = 30, step = 1),
-                actionButton("goDD", label = strong("Simulate!"))
+                actionButton("goDD", label = strong("Simulate!"),
+                             style="color: #fff; background-color: #337ab7; border-color: #2e6da4")
             )
         ),
         
@@ -186,6 +187,19 @@ gwespTab =
         
         # Inputs
         fluidRow(
+            
+            box(width = 3, title = "Network Parameters",
+                status = "primary", solidHeader = TRUE,
+                sliderInput("netSize3", 
+                            label = "Number of Nodes", ticks = FALSE,
+                            min = 5, max = 500, 
+                            value = 50, step = 5),
+                sliderInput("meanDegree3", 
+                            label = "Average Degree", ticks = FALSE,
+                            min = 1 / 25, max = 49 / 4, 
+                            value = log10(50), step = .1)
+                
+            ),
             box(width = 3, title = "GWDegree Parameters",
                 status = "primary", solidHeader = TRUE,
                 sliderInput("gwd3", label = HTML("&theta;<sub>GWD</sub>"), 
@@ -210,19 +224,6 @@ gwespTab =
                             min = 0, max = 1, value = .25, step = 0.05)
             ),
             
-            box(width = 3, title = "Network Parameters",
-                status = "primary", solidHeader = TRUE,
-                sliderInput("netSize3", 
-                            label = "Number of Nodes", ticks = FALSE,
-                            min = 5, max = 500, 
-                            value = 50, step = 5),
-                sliderInput("meanDegree3", 
-                            label = "Average Degree", ticks = FALSE,
-                            min = 1 / 25, max = 49 / 4, 
-                            value = log10(50), step = .1)
-                
-            ),
-            
             box(width = 3, title = "Simulation Parameters",
                 status = "primary", solidHeader = TRUE,
                 selectInput("reps3", 
@@ -235,7 +236,8 @@ gwespTab =
                                            "17 x 17" = 17,
                                            "31 x 31" = 31),
                             selected = 5),
-                actionButton("goGWESP", label = strong("Simulate!"))
+                actionButton("goGWESP", label = strong("Simulate!"),
+                             style="color: #fff; background-color: #337ab7; border-color: #2e6da4")
             )
         ),
         
