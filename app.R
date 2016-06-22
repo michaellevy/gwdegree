@@ -12,12 +12,14 @@ cols = structure(rev(RColorBrewer::brewer.pal(length(gwdDecayOptions) + 2, 'BuPu
 changeStatTab = 
     tabItem(tabName = "stat",
             h2("GW Degree Statistic Behavior"),
-            "Plot the change to the GWD statistic for adding an edge to a node of given degree, at various decay-parameter values.",
-            tags$br(), tags$br(),
-            "Note that for any positive value of ", HTML("&theta;<sub>S</sub>"),
-            " the statistic is increasing for any edge, and an edge on a lower-degree 
-            node increases the statistic more than an edge on a higher-degree node.
-            The implications of this are discussed below.",
+            HTML("Plot the change to the GWD statistic for adding an edge to a node of given degree, 
+            at various decay-parameter (&theta;<sub>S</sub>) values.<br><br>
+            The take-home point here is that the statistic increases with any edge, 
+            and it always increases more for edge added to a 
+            lower-degree node than a higher-degree node. The implication is that for positive values of the corresponding 
+            parameter (&theta;<sub>GWD</sub>), the likelihood of an edge on a lower-degree node is greater than an edge on a high-degree node.
+                 This is discussed in more detail below the charts.<br><br>
+                 The second take-home point is that &theta;<sub>S</sub> should never be less than zero."),
             tags$br(), tags$br(),
             
             fluidRow(
@@ -51,19 +53,22 @@ changeStatTab =
             withMathJax("$$GWD(\\mathbf{y}, \\theta_s) = e^{\\theta_s} \\sum_{k=1}^{n-1}[1-(1-e^{-\\theta_s})^{k}]D_{k}(\\mathbf{y})$$"),
             withMathJax("Where \\(\\mathbf{y}\\) is the network of \\(n\\) nodes, \\(D_{k}\\) of which have degree-\\(k\\), and \\(\\theta_s\\)
                     is a decay parameter that controls the severity of geometric weighting. 
-                    The change statistic for adding a half-edge to a node of degree-k is:"),
+                    The change statistic for adding a half-edge to a node of degree-k, then, is:"),
             withMathJax("$$\\delta GWD = (1 - e^{-\\theta_s})^k$$"),
             
             h3("Implication"),
-            "In an ERGM, the change in the log-odds of an edge is given by the 
-            product of the change statistic and the parameter value. 
-            So for positive GWD parameters,
+            HTML("In an ERGM, the change in the log-odds of an edge is given by the 
+            product of the change statistic and the parameter value (akin to a logistic regression). 
+            So, for positive GWD parameters,
             edges that increase the change statistic more are more likely; conversely,
             for negative GWD parameter values, edges that
             increase the change statistic less are more likely. Note in the plot above that edges to nodes of low degree increase the statistic more.
             This implies that positive GWD parameters reward edges to low-degree nodes, and negative GWD parameters reward edges to higher-degree nodes.
-            Therefore, ", strong("negative GWD parameter estimates are consistent with networks more centralized (i.e. with higher-variance degree distributions)
-            than expected by chance, ", em("ceteris paribus."))
+            Therefore, <b>negative GWD parameter estimates are consistent with networks more centralized (i.e. with higher-variance degree distributions)
+            than expected by chance, <i>ceteris paribus.</i></b> The astute reader will notice that for &theta;<sub>GWD</sub> < 0, all edges are 
+            penalized and for &theta;<sub>GWD</sub> > 0, all edges are rewarded. This fact is offset by the inclusion of a 
+            density or edges term in the model which establishes the baseline likelihood of any edge, or constraining the number
+            of edges in the network. It is the <i>relative</i> likelihood of edges on various nodes that is of interest.")
     )
 
 
@@ -72,21 +77,45 @@ degDistTab =
     tabItem(
         tabName = "degdist",
         h2("Parameter & Degree Distribution"),
-        HTML("Simulate networks with various values of
-        the GWD-parameter and GWD-decay-parameter and examine the affects on 
-        network structure (left) and degree distribution (right), compared to
-        random graphs of the same size and density. <br><br>
-        The degree distribution histograms are averaged over the chosen number of 
-        simulated networks; the networks at left are sample realizations from
-        those simulations.
-        &theta;<sub>GWD</sub> is an ERGM parameter associated with the GW-Degree statistic.
-        &theta;<sub>S</sub> (aka \"decay\") is a shape parameter that controls 
-        how severely edges after the first are discounted. See the \"Statistic Behavior\"
-        tab for the intuition on how &theta;<sub>S</sub> works."),
+        HTML("The two networks plotted below have the same number of nodes and edges,
+             but the purple one is a random network (all edges equiprobable), 
+            while the blue one is simulated with the 
+             selected GWD parameter and decay values. Adjust the sliders and click
+            \"Simulate!\" to see how the blue
+             network changes relative to the baseline of the purple one.<br><br>
+             The histograms at right are average degree distributions from multiple 
+             networks simulated the same way as the plotted networks. You can examine
+            degree centralization directly as a response to parameter values in the
+            \"Centralization, Clustering, & GWESP\" tab at left.<br><br>
+             Note that when &theta;<sub>GWD</sub> < 0, there are more high- and
+             low-degree nodes, and when &theta;<sub>GWD</sub> > 0, there are more
+             middle-degree nodes. That is, negative values of &theta;<sub>GWD</sub>
+             are consistent with a network more centralized than expected by chance. 
+             The particular shape of the degree distribution
+             is a function of &theta;<sub>S</sub> (aka \"decay\"), as well as network
+             size and density. As &theta;<sub>S</sub> approaches zero, changes
+             to low-degree nodes have more of an effect on the statistic than changes
+             to high-degree nodes. See the \"Statistic Behavior\" tab for the intuition on this.
+             Increasing the number of simulated networks reduces 
+             noise from stochastic simulation, but simulations can be computationally
+             expensive, especially for large and dense networks."),
         tags$br(), tags$br(),
         
         # Inputs
         fluidRow(
+            box(width = 4, title = "Network Parameters",
+                status = "primary", solidHeader = TRUE,
+                sliderInput("netSize", 
+                            label = "Number of Nodes", ticks = FALSE,
+                            min = 5, max = 500, 
+                            value = 100, step = 5),
+                sliderInput("meanDegree", 
+                            label = "Average Degree", ticks = FALSE,
+                            min = .02, max = 24.75, 
+                            value = 2, 
+                            step = .01)
+            ),
+            
             box(width = 4, title = "GWDegree Parameters",
                 status = "primary", solidHeader = TRUE,
                 sliderInput("gwd", label = HTML("&theta;<sub>GWD</sub>"), 
@@ -99,24 +128,14 @@ degDistTab =
                             min = 0, max = 5, value = 2, step = 0.1)
             ),
             
-            box(width = 4, title = "Network Parameters",
-                status = "primary", solidHeader = TRUE,
-                sliderInput("netSize", 
-                            label = "Number of Nodes", ticks = FALSE,
-                            min = 5, max = 500, 
-                            value = 100, step = 5),
-                sliderInput("meanDegree", 
-                            label = "Average Degree", ticks = FALSE,
-                            min = 0, max = 10, 
-                            value = 3, step = .1)
-            ),
-            
             box(width = 4, title = "Simulation Parameters",
                 status = "primary", solidHeader = TRUE,
                 sliderInput("reps", 
                             label = "Number of Simulated Networks", ticks = FALSE,
                             min = 10, max = 100, 
-                            value = 30, step = 1))
+                            value = 30, step = 1),
+                actionButton("goDD", label = strong("Simulate!"))
+            )
         ),
         
         
@@ -125,19 +144,45 @@ degDistTab =
         fluidRow(
             ## Sample graphs (visNet?)
             box(status = "primary", plotOutput("bothGraphs")),
-
+            
             ## Degree Distribution
             box(status = "primary", plotOutput("degDistPlot"))
         )
     )
 
 
-### GWESP  ####
+### Confoundedness  ####
 gwespTab = 
     tabItem(
         tabName = "gwesp",
         h2("Confoundedness of Centralization & Clustering"),
-        "The two affect each other ... ",
+        HTML("Here you can examine how network centralization (the tendency for edges to
+        be concentrated on popular actors) and clustering (the tendency to form complete triangles)
+        respond across a range of not only GWD-, but also GWESP-parameter values, and
+        their respective decay parameters, as well as network size and density. To examine
+        just &theta;<sub>GWD</sub>'s effects, look across the horizontal 
+        &theta;<sub>GWESP</sub> = 0 line. Note, as in the other tabs, that greater
+        values of &theta;<sub>GWD</sub> correspond to <i>less</i> centralized networks.<br><br>
+        Note also the confoundedness of clustering and centralization: Negative values
+        of &theta;<sub>GWD</sub> create centralized networks, where there are many
+        edges in close proximity, which leads to 
+        complete triangles by chance. Likewise, positive &theta;<sub>GWESP</sub> values
+        create complete triangles, which puts edges near each other, incidentally causing
+        centralized networks. Thankfully, ERGMs that include
+        both GWD and GWESP parameters can distinguish the two effects to the extent
+        that they leave a distinctive structural signature in the network. 
+        For this reason, modeling
+        efforts that include one GW-term should at least begin with both terms (and 
+        probably GWDSP as well to distinguish tendency for two-paths from the tendency
+        for two-paths that become closed triangles.)
+        <br><br>
+        Note that these simulations are computationally expensive: This simulates the chosen number of 
+        networks for every cell in the grid. As a benchmark, it takes about six seconds to 
+        run the 81 simulations needed for a single round of a 50 node network on a 9 x 9 grid; 
+        for a 31 x 31 grid and 500-node network you're looking at about 2.5 minutes
+        per simulation."),
+        
+        tags$br(), tags$br(),
         
         # Inputs
         fluidRow(
@@ -173,34 +218,35 @@ gwespTab =
                             value = 50, step = 5),
                 sliderInput("meanDegree3", 
                             label = "Average Degree", ticks = FALSE,
-                            min = 0, max = 10, 
-                            value = 3, step = .1)
+                            min = 1 / 25, max = 49 / 4, 
+                            value = log10(50), step = .1)
+                
             ),
             
             box(width = 3, title = "Simulation Parameters",
                 status = "primary", solidHeader = TRUE,
                 selectInput("reps3", 
                             label = "Number of Simulated Networks", 
-                            choices = as.list(1:10), selected = 3),
+                            choices = as.list(1:5), selected = 3),
                 selectInput("gridSize",
                             label = "Grid size",
                             choices = list("5 x 5" = 5,
                                            "9 x 9" = 9,
                                            "17 x 17" = 17,
                                            "31 x 31" = 31),
-                            selected = 5)
-                )
+                            selected = 5),
+                actionButton("goGWESP", label = strong("Simulate!"))
+            )
         ),
         
-                   
-                   fluidRow(
-                       box(status = "primary", plotOutput("centHeatmap")),
-                       box(status = "primary", plotOutput("ccHeatmap"))
-                   )
-                   
-                   
-                   
-)
+        fluidRow(
+            box(status = "primary", plotOutput("centHeatmap")),
+            box(status = "primary", plotOutput("ccHeatmap"))
+        )
+        
+        
+        
+    )
 
 
 
@@ -212,7 +258,7 @@ sidebar =
     dashboardSidebar(sidebarMenu(
         menuItem("Statistic Behavior", tabName = "stat"),
         menuItem("Parameter & Degree Distribution", tabName = "degdist", selected = TRUE),
-        menuItem("Confounded with GWESP", tabName = "gwesp")
+        menuItem("Centralization, Clustering, & GWESP", tabName = "gwesp")
     ))
 
 
@@ -229,7 +275,7 @@ ui = dashboardPage(header, sidebar, body)
 
 # Server  ####
 server =
-    shinyServer(function(input, output) {
+    shinyServer(function(input, output, session) {
         
         lapply(c('ergm', 'network', 'sna', 'ggplot2', 'dplyr', 'scales', 'magrittr'), 
                require, char = TRUE)
@@ -249,85 +295,119 @@ server =
         
         
         ### Degree Distribution plots ####
-        netCols = structure(cols[c(2, 5)], names = c("random", "gwd"))
+        
+        #### Update the meanDegree slider to avoid having too many edges:
+        observe({
+            updateSliderInput(session, "meanDegree", 
+                              value = log10(input$netSize),
+                              min = 2 / input$netSize,   # Need at least one edge
+                              max = (input$netSize - 1) / 4)  # And at most half the possible edges.
+            # (N - 1) / 2 is actual max for undir'd net, but it trips up simulate() 
+            # and nearly-complete graphs are expensive and not of much interest.
+        })
 
+        netCols = structure(cols[c(2, 5)], names = c("random", "gwd"))
+        
         #### Simulate many and plot degree distributions
-        degDists = 
+        degDists =
             reactive({
-                networks = vector('list', 2L)
-                networks[[1]] = replicate(input$reps, 
-                                          intergraph::asNetwork(igraph::erdos.renyi.game(input$netSize, input$netSize * input$meanDegree, "gnm")), 
-                                          simplify = FALSE)
                 
-                networks[[2]] = simulate.formula(networks[[1]][[1]] ~ gwdegree(input$decay, TRUE), coef = input$gwd,
-                                                 constraints = ~ edges,
-                                                 nsim = input$reps)
-                names(networks) = c('random', 'gwd')
-                # Calculate the degrees of each graph and make a freq table of each
-                # The factor levels is to include 0-counts
-                # Then take the median count of each degree
+                input$goDD  # This button causes the reactive to update, but
+                            # not all the isolated code that directly takes
+                            # slider inputs below.
                 
-                dd = lapply(seq_along(networks), function(type) {
-                    # type is stack of simulated graphs of a particular type
-                    # Split into each simulation, tabulate degrees, and use `smartbind` to match on names (ie, degree)
-                    deg = 
-                        degree(networks[[type]], g = 1:length(networks[[type]]), gmode = 'graph') %>% 
-                        split(., 1:ncol(.)) %>%
-                        lapply(table) %>%
-                        do.call(gtools::smartbind, .)
-                    # Where smartbind fills with NA, there were no nodes of that degree, so replace with zero:
-                    deg[is.na(deg)] = 0
+                isolate({
+                    networks = vector('list', 2L)
+                    networks[[1]] = replicate(input$reps, 
+                                              intergraph::asNetwork(igraph::erdos.renyi.game(input$netSize, input$netSize * input$meanDegree, "gnm")), 
+                                              simplify = FALSE)
                     
-                    # Calculate median count for each degree and mean prob of each degree and organize in df
-                    data.frame(degree = as.integer(colnames(deg)),
-                               meanFreq = apply(deg, MARGIN = 2, mean),
-                               type = names(networks[type]))
+                    networks[[2]] = simulate.formula(networks[[1]][[1]] ~ gwdegree(input$decay, TRUE), coef = input$gwd,
+                                                     constraints = ~ edges,
+                                                     nsim = input$reps)
+                    names(networks) = c('random', 'gwd')
+                    # Calculate the degrees of each graph and make a freq table of each
+                    # The factor levels is to include 0-counts
+                    # Then take the median count of each degree
                     
-                }) %>%
-                    do.call(rbind, .)
-                
-                # Fill in the degrees-never-found to keep box-widths constant
-                filled = expand.grid(
-                    degree = 0:max(dd$degree),
-                    type = names(networks)
-                )
-                filled = dplyr::left_join(filled, dd, by = c("degree", "type"))
-                filled$meanFreq[is.na(filled$meanFreq)] = 0
+                    dd = lapply(seq_along(networks), function(type) {
+                        # type is stack of simulated graphs of a particular type
+                        # Split into each simulation, tabulate degrees, and use `smartbind` to match on names (ie, degree)
+                        deg = 
+                            degree(networks[[type]], g = 1:length(networks[[type]]), gmode = 'graph') %>% 
+                            split(., 1:ncol(.)) %>%
+                            lapply(table) %>%
+                            do.call(gtools::smartbind, .)
+                        # Where smartbind fills with NA, there were no nodes of that degree, so replace with zero:
+                        deg[is.na(deg)] = 0
+                        
+                        # Calculate median count for each degree and mean prob of each degree and organize in df
+                        data.frame(degree = as.integer(colnames(deg)),
+                                   meanFreq = apply(deg, MARGIN = 2, mean),
+                                   type = names(networks[type]))
+                        
+                    }) %>%
+                        do.call(rbind, .)
+                    
+                    # Fill in the degrees-never-found to keep box-widths constant
+                    filled = expand.grid(
+                        degree = 0:max(dd$degree),
+                        type = names(networks)
+                    )
+                    filled = dplyr::left_join(filled, dd, by = c("degree", "type"))
+                    filled$meanFreq[is.na(filled$meanFreq)] = 0
+                })
                 
                 list(dd = filled, random = networks[[1]][[1]], gwd = networks[[2]][[1]])
+                
                 
             })
         
         #### Plot degree distributions ####
         output$degDistPlot = renderPlot({
+            
             ggplot(degDists()[["dd"]], aes(x = degree, y = meanFreq, fill = type)) +
                 geom_bar(stat = 'identity', position = position_dodge(width = .5),
                          alpha = .75, width = 1.2, color = 'black') +
                 ylab('Mean frequency') + xlab('Degree') +
                 xlim(c(0, NA)) + 
                 scale_fill_manual(values = netCols, name = 'Network', 
-                                  labels = c('Random Graph', 'Chosen Parameters')) +
+                                  labels = c('Random Network', 'GWD Network')) +
                 theme(legend.justification = c(1, 1), legend.position = c(1, 1))
         })            
         
         #### Plot sample networks ####
         output$bothGraphs = renderPlot({
+            
             par(mfrow = c(1, 2), mar = c(0, 0, 2, 0))
-            plotNet(degDists()[["random"]], netCols["random"], "Random Graph")
-            plotNet(degDists()[["gwd"]], netCols["gwd"], "Chosen Parameters")
+            plotNet(degDists()[["random"]], netCols["random"], "Random Network (Null Model)")
+            plotNet(degDists()[["gwd"]], netCols["gwd"], "GWD Network")
         })
         
         
         ### GWD & GWESP ####
+        
+        ##### Reactive degree slider:
+        #### Update the meanDegree slider to avoid having too many edges, as in deg-dist tab
+        observe({
+            updateSliderInput(session, "meanDegree3", 
+                              value = log10(input$netSize),
+                              min = 2 / input$netSize,   # Need at least one edge
+                              max = (input$netSize - 1) / 4)  # And at most half the possible edges.
+        })
+        
         heatmaps = reactive({
-            simCCCent(gwdRange = input$gwd3,
-                      gwespRange = input$gwesp3,
-                      theta_s = input$theta_s3,
-                      theta_t = input$theta_t3,
-                      gridSize = as.integer(input$gridSize),
-                      nsim = as.integer(input$reps3),
-                      netSize = input$netSize3,
-                      meanDegree = input$meanDegree3)
+            input$goGWESP
+            isolate({
+                simCCCent(gwdRange = input$gwd3,
+                          gwespRange = input$gwesp3,
+                          theta_s = input$theta_s3,
+                          theta_t = input$theta_t3,
+                          gridSize = as.integer(input$gridSize),
+                          nsim = as.integer(input$reps3),
+                          netSize = input$netSize3,
+                          meanDegree = input$meanDegree3)
+            })
         })
         output$centHeatmap = renderPlot(heatmaps()$cent)
         output$ccHeatmap = renderPlot(heatmaps()$cc)

@@ -63,6 +63,7 @@ simCCCent = function(gwdRange = c(-2, 2), gwespRange = c(-.5, .5),
     N = intergraph::asNetwork(igraph::erdos.renyi.game(netSize, netSize * meanDegree, "gnm"))
     
     dfForSim = 
+        # Could parallelize this! Not sure how many cores shinyapps.io gives...xs
         lapply(1:nrow(dfForSim), function(i) {
             n = simulate.formula(N ~ gwdegree(theta_s, TRUE) + gwesp(theta_t, TRUE), 
                                  coef = unlist(dfForSim[i, ]),
