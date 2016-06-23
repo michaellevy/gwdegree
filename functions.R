@@ -1,10 +1,11 @@
+theme_set(theme_bw(base_size = 20))
+
 plotDeltaGWD = function(d, cols) {
     ggplot(d, aes(x = degree, y = delta_GWD, color = as.factor(theta_s))) + 
         geom_line(size = 1) +
         ylab(expression(paste(delta, ' GWD'))) +
         xlab('Node degree') +
         scale_x_continuous(breaks = scales::pretty_breaks()) +
-        theme_bw(base_size = 20) +
         theme(aspect.ratio = 1) +
         scale_color_manual(values = cols, name = expression(theta[s]),
                            guide = guide_legend(reverse = TRUE))
@@ -49,7 +50,7 @@ plotNet = function(net, vCol, mtext) {
          vertex.lwd = .35,
          vertex.cex = 4 - log10(network.size(net))
          ) 
-    mtext(mtext)
+    mtext(mtext, cex = 1.5)
 }
 
 simCCCent = function(gwdRange = c(-2, 2), gwespRange = c(-.5, .5),
@@ -63,7 +64,6 @@ simCCCent = function(gwdRange = c(-2, 2), gwespRange = c(-.5, .5),
     N = intergraph::asNetwork(igraph::erdos.renyi.game(netSize, netSize * meanDegree, "gnm"))
     
     dfForSim = 
-        # Could parallelize this! Not sure how many cores shinyapps.io gives...xs
         lapply(1:nrow(dfForSim), function(i) {
             n = simulate.formula(N ~ gwdegree(theta_s, TRUE) + gwesp(theta_t, TRUE), 
                                  coef = unlist(dfForSim[i, ]),
@@ -89,7 +89,7 @@ plotHeatmaps = function(df) {
         cent = 
             ggplot(df, aes(x = gwd, y = gwesp, fill = Centralization)) +
             geom_raster(alpha = .7) +
-            scale_fill_gradientn(colours = topo.colors(1e3), name = 'Degree\ncentralization')+
+            scale_fill_gradientn(colours = topo.colors(1e3), name = "") +
             # scale_fill_gradient2(name = 'Degree\ncentralization', mid = 'lightgray', 
             #                      midpoint = strSims$Centralization[strSims$GWD == 0 & strSims$GWESP == 0]) +
             xlab(expression(theta[GWD])) +
@@ -99,7 +99,7 @@ plotHeatmaps = function(df) {
         cc = 
             ggplot(df, aes(x = gwd, y = gwesp, fill = ClusteringCoef)) +
             geom_raster(alpha = .7) +
-            scale_fill_gradientn(colours = topo.colors(1e3), name = 'Clustering\nCoefficient')+
+            scale_fill_gradientn(colours = topo.colors(1e3), name = "") +
             # scale_fill_gradient2(name = 'Clustering\nCoefficient', mid = 'lightgray', 
             #                      midpoint = strSims$ClusteringCoef[strSims$GWD == 0 & strSims$GWESP == 0]) +
             xlab(expression(theta[GWD])) +

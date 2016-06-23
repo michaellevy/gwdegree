@@ -5,3 +5,5 @@
 .Ruserdata
 tmp_eg.R
 .DS_Store
+*.png
+.httr-oauth
