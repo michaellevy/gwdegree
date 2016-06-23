@@ -1,0 +1,5 @@
+This Shiny app is meant to be viewed with my Political Networks 2016 [poster](http://dl.dropboxusercontent.com/s/01ajnw2at0idl3f/levy-polnet2016.pdf?dl=0). 
+
+You can see the working Shiny app [here](michaellevy.shinyapps.io/gwdegree). 
+
+The maximum network size and simulation parameters are pretty conservative in the deployed Shiny app to avoid server stall. If you would like to use this app for your own research (e.g. to determine appropriate $\theta_S$ values for you network or to aid interpretation of an estimated $\theta_{GWD}$ value), consider cloning the repo and deploying the app locallly. After cloning the repo (terminal: `git clone https://github.com/michaellevy/GWDegree-Shiny.git`), you should be able to run application by opening the app.R file and clicking "Run App" in RStudio or via `shiny::runApp()`. You'll need some to have some packages installed: shiny, shinydashboard, statnet, ggplot2, dplyr, scales.
