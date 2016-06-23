@@ -123,7 +123,7 @@ degDistTab =
                             value = 100, step = 5),
                 sliderInput("meanDegree", 
                             label = "Average Degree", ticks = FALSE,
-                            min = .02, max = 8, 
+                            min = .04, max = 8, 
                             value = 2, 
                             step = .1)
             ),
@@ -208,7 +208,7 @@ gwespTab =
                             value = 50, step = 5),
                 sliderInput("meanDegree3", 
                             label = "Average Degree", ticks = FALSE,
-                            min = 1 / 25, max = 8, 
+                            min = .04, max = 8, 
                             value = 2, step = .1)
                 
             ),
@@ -319,7 +319,7 @@ server =
         observe({
             updateSliderInput(session, "meanDegree", 
                               value = log10(input$netSize),
-                              min = 2 / input$netSize,   # Need at least one edge
+                              min = 4 / input$netSize,   # Need at least one edge
                               max = min(10, input$netSize / 20 + 3, (input$netSize - 2) / 2)
                               )  
             # (N - 1) / 2 is actual max for undir'd net, but it trips up simulate() 
@@ -335,11 +335,12 @@ server =
                 input$goDD  # This button causes the reactive to update, but
                             # not all the isolated code that directly takes
                             # slider inputs below.
+
                 
                 isolate({
                     networks = vector('list', 2L)
                     networks[[1]] = replicate(input$reps, 
-                                              intergraph::asNetwork(igraph::erdos.renyi.game(input$netSize, input$netSize * input$meanDegree, "gnm")), 
+                                              intergraph::asNetwork(igraph::erdos.renyi.game(input$netSize, input$netSize * input$meanDegree / 2, "gnm")), 
                                               simplify = FALSE)
                     
                     networks[[2]] = simulate.formula(networks[[1]][[1]] ~ gwdegree(input$decay, TRUE), coef = input$gwd,
@@ -368,23 +369,30 @@ server =
                         # Where smartbind fills with NA, there were no nodes of that degree, so replace with zero:
                         deg[is.na(deg)] = 0
                         deg$type = names(networks[type])
-                        deg
-                    }) %>%
-                        do.call(rbind, .)
+                        
+                        list(deg = deg, 
+                             var = data.frame(
+                                 type = names(networks)[type],
+                                 var = mean(sapply(networks[[type]], function(n) var(degree(n, gmode = 'graph'))))
+                                 ))
+                    }) 
+                    
+                    vari = do.call(rbind, lapply(dd, "[[", "var"))
+                    deg = do.call(rbind, lapply(dd, "[[", "deg"))
                     
                     # Fill in the degrees-never-found to keep box-widths constant
                     filled = expand.grid(
-                        degree = 0:max(dd$degree),
+                        degree = 0:max(deg$degree),
                         type = names(networks),
                         sim = 1:input$reps,
                         stringsAsFactors = FALSE
                     )
-                    filled = dplyr::left_join(filled, dd, by = c("degree", "type", "sim"))
+                    filled = dplyr::left_join(filled, deg, by = c("degree", "type", "sim"))
                     filled$count[is.na(filled$count)] = 0
                     filled$type = factor(filled$type, levels = sort(unique(filled$type), decreasing = TRUE))
                 })
                 
-                list(dd = filled, random = networks[[1]][[1]], gwd = networks[[2]][[1]])
+                list(dd = filled, variance = vari, random = networks[[1]][[1]], gwd = networks[[2]][[1]])
                 
                 
             })
@@ -412,7 +420,7 @@ server =
             
             par(mfrow = c(1, 2), mar = c(0, 0, 3.5, 0))
             plotNet(degDists()[["random"]], netCols["random"], "Random Network\n(Null Model)")
-            plotNet(degDists()[["gwd"]], netCols["gwd"], "GWD Network")
+            plotNet(degDists()[["gwd"]], netCols["gwd"], "GWD Network\n")
         })
         
         
@@ -423,7 +431,7 @@ server =
         observe({
             updateSliderInput(session, "meanDegree3", 
                               value = log10(input$netSize),
-                              min = 2 / input$netSize,   # Need at least one edge
+                              min = 4 / input$netSize,   # Need at least one edge
                               max = min(10, input$netSize / 20 + 3, (input$netSize - 2) / 2)
             )
         })
