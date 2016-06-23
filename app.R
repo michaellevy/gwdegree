@@ -189,7 +189,11 @@ gwespTab =
         for two-paths that become closed triangles.)
         <br><br>
         Note that these simulations are computationally expensive. Especially for larger
-             and denser networks, the calculations will several dozen seconds."),
+             and denser networks, the calculations will several dozen seconds. If you would
+             like to run these simulations for larger networks, consider cloning the app
+             and deploying it locally. Instructions and code are "),
+        tags$a(href="https://github.com/michaellevy/GWDegree-Shiny", "on GitHub"), ".",
+        
         
         tags$br(), tags$br(),
         
