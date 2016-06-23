@@ -398,7 +398,10 @@ server =
             ggplot(degDists()[["dd"]], aes(x = factor(degree), y = count, fill = type)) +
                 geom_boxplot(position = position_dodge(width = .5),
                              alpha = .75, color = 'black') +
-                ylab('Node Count') + xlab('Degree') +
+                ylab('Node Count') + 
+                # xlab('Degree') +
+                scale_x_discrete(name = "Degree",
+                                 breaks = seq(0, max(degDists()[["dd"]]$degree), by = 5)) +
                 scale_fill_manual(values = netCols, name = 'Network',
                                   labels = c('Random Network', 'GWD Network')) +
                 theme(legend.justification = c(1, 1), legend.position = c(1, 1))
