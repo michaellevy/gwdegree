@@ -116,18 +116,13 @@ degDistTab =
           status = "primary", solidHeader = TRUE,
           sliderInput("netSize",
                       label = "Number of Nodes", ticks = FALSE,
-                      min = 5, max = 500,
+                      min = 20, max = 500,
                       value = 100, step = 5),
-          # sliderInput("numEdges",
-          #             label = "Number of Edges", ticks = FALSE,
-          #             min = 1, max = 1e3,
-          #             value = 100,
-          #             step = 1)
           sliderInput("density",
                       label = "Network Density", ticks = FALSE,
-                      min = .01, max = .2,
-                      value = .05,
-                      step = .01)
+                      min = .001, max = .2,
+                      value = .02,
+                      step = .001)
       ),
 
       box(width = 4, title = "GWDegree Parameters",
@@ -135,8 +130,6 @@ degDistTab =
           sliderInput("gwd", label = HTML("&theta;<sub>GWD</sub>"),
                       ticks = FALSE,
                       min = -5, max = 5, value = -3, step = 0.1),
-          # box(width = 6, title = HTML("&theta;<sub>S</sub> (aka \"decay\")"),
-          # status = "primary", solidHeader = TRUE,
           sliderInput("decay", label = HTML("&theta;<sub>S</sub> (aka \"decay\")"),
                       ticks = FALSE,
                       min = 0, max = 5, value = 2, step = 0.1)
@@ -208,10 +201,11 @@ gwespTab =
                       label = "Number of Nodes", ticks = FALSE,
                       min = 5, max = 250,
                       value = 50, step = 5),
-          sliderInput("meanDegree3",
-                      label = "Average Degree", ticks = FALSE,
-                      min = .04, max = 8,
-                      value = 2, step = .1)
+          sliderInput("density3",
+                      label = "Network Density", ticks = FALSE,
+                      min = .001, max = .2,
+                      value = .02,
+                      step = .001)
 
       ),
 
@@ -220,8 +214,6 @@ gwespTab =
           sliderInput("gwd3", label = HTML("&theta;<sub>GWD</sub>"),
                       ticks = FALSE,
                       min = -5, max = 5, value = c(-3, 3), step = 0.1),
-          # box(width = 6, title = HTML("&theta;<sub>S</sub> (aka \"decay\")"),
-          # status = "primary", solidHeader = TRUE,
           sliderInput("theta_s3", label = HTML("&theta;<sub>S</sub> (aka \"decay\")"),
                       ticks = FALSE,
                       min = 0, max = 5, value = 2, step = 0.1)
@@ -320,9 +312,9 @@ server =
     #### Update the density slider to avoid having too many edges:
     observe({
       updateSliderInput(session, "density",
-                        value = .05,
-                        min = .01,
-                        max = log10(input$netSize)^-3
+                        value = 4 / input$netSize,
+                        min = .001,
+                        max = round(10 / input$netSize, 2)
       )
     })
 
@@ -428,13 +420,12 @@ server =
 
     ### GWD & GWESP ####
 
-    ##### Reactive degree slider:
-    #### Update the meanDegree slider to avoid having too many edges, as in deg-dist tab
+    ##### Reactive density slider:
     observe({
-      updateSliderInput(session, "meanDegree3",
-                        value = log10(input$netSize),
-                        min = 4 / input$netSize,   # Need at least one edge
-                        max = min(10, input$netSize / 20 + 3, (input$netSize - 2) / 2)
+      updateSliderInput(session, "density3",
+                        value = 4 / input$netSize,
+                        min = .001,
+                        max = round(10 / input$netSize, 2)
       )
     })
 
@@ -448,7 +439,7 @@ server =
                   gridSize = as.integer(input$gridSize),
                   nsim = as.integer(input$reps3),
                   netSize = input$netSize3,
-                  meanDegree = input$meanDegree3)
+                  density = input$density3)
       })
     })
     output$centHeatmap = renderPlot(heatmaps()$cent)
