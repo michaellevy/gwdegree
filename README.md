@@ -1,5 +1,14 @@
-This Shiny app is meant to be viewed with my Political Networks 2016 [poster](http://dl.dropboxusercontent.com/s/01ajnw2at0idl3f/levy-polnet2016.pdf?dl=0). 
+## Geometrically Weighted Degree
 
-You can see the working Shiny app [here](michaellevy.shinyapps.io/gwdegree). 
+There is ambiguity and confusion in the research community about how to interpret GWDegree estimates in exponential random graph models (ERGMs). This app aims to help.
 
-The maximum network size and simulation parameters are pretty conservative in the deployed Shiny app to avoid server stall. If you would like to use this app for your own research (e.g. to determine appropriate $\theta_S$ values for you network or to aid interpretation of an estimated $\theta_{GWD}$ value), consider cloning the repo and deploying the app locallly. After cloning the repo (terminal: `git clone https://github.com/michaellevy/GWDegree-Shiny.git`), you should be able to run application by opening the app.R file and clicking "Run App" in RStudio or via `shiny::runApp()`. You'll need some to have some packages installed: shiny, shinydashboard, statnet, igraph, intergraph, ggplot2, dplyr, scales.
+There is a working version [online](michaellevy.shinyapps.io/gwdegree), but it has pretty conservative limits. If you want to do anything more than play with it, you can install and run it locally with the code below, which should launch the app on your machine. 
+
+```
+if (!"devtools" %in% installed.packages()[, "Package"]) install.packages("devtools")
+devtools::install_github("michaellevy/gwdegree")
+library(gwdegree)
+gwdegree()
+```
+
+I presented a poster on this at Political Networks 2016. You can view that [here](https://figshare.com/articles/Interpretation_of_GW-Degree_Estimates_in_ERGMs/3465020). It got an honorable mention for methodological contribution at the conference.

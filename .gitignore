@@ -7,3 +7,4 @@ tmp_eg.R
 *.png
 .httr-oauth
 rsconnect/
+*.txt
