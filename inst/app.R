@@ -32,7 +32,7 @@ changeStatTab =
                        status = "primary", solidHeader = TRUE,
                        checkboxGroupInput("theta_s", label = NULL, # h4(HTML("&theta;<sub>S</sub> (aka \"decay\")")),
                                           choices = gwdDecayOptions,
-                                          selected = 1)  # gwdDecayOptions[unlist(gwdDecayOptions) >= 0])
+                                          selected = gwdDecayOptions[unlist(gwdDecayOptions) >= 0])
                    ),
                    box(width = NULL, title = "Degree Range",
                        status = "primary", solidHeader = TRUE,
@@ -116,12 +116,12 @@ degDistTab =
           status = "primary", solidHeader = TRUE,
           sliderInput("netSize",
                       label = "Number of Nodes", ticks = FALSE,
-                      min = 20, max = 500,
+                      min = 20, max = 1e3,
                       value = 100, step = 5),
           sliderInput("density",
                       label = "Network Density", ticks = FALSE,
                       min = .001, max = .2,
-                      value = .02,
+                      value = .04,
                       step = .001)
       ),
 
@@ -139,8 +139,8 @@ degDistTab =
           status = "primary", solidHeader = TRUE,
           sliderInput("reps",
                       label = "Number of Simulated Networks", ticks = FALSE,
-                      min = 10, max = 30,
-                      value = 15, step = 1),
+                      min = 3, max = 50,
+                      value = 10, step = 1),
           actionButton("goDD", label = strong("Simulate!"))
       )
     ),
@@ -184,7 +184,7 @@ gwespTab =
         for two-paths that become closed triangles.)
         <br><br>
         Note that these simulations are computationally expensive. Especially for larger
-             and denser networks, the calculations will several dozen seconds. If you would
+             and denser networks, the calculations may take minutes. Start slowly and work your way up. If you would
              like to run these simulations for larger networks, consider cloning the app
              and deploying it locally. Instructions and code are "),
     tags$a(href="https://github.com/michaellevy/GWDegree-Shiny", "on GitHub"), ".",
@@ -199,12 +199,12 @@ gwespTab =
           status = "primary", solidHeader = TRUE,
           sliderInput("netSize3",
                       label = "Number of Nodes", ticks = FALSE,
-                      min = 5, max = 250,
+                      min = 20, max = 500,
                       value = 50, step = 5),
           sliderInput("density3",
                       label = "Network Density", ticks = FALSE,
                       min = .001, max = .2,
-                      value = .02,
+                      value = 4 / 50,
                       step = .001)
 
       ),
@@ -224,8 +224,6 @@ gwespTab =
           sliderInput("gwesp3", label = HTML("&theta;<sub>GWESP</sub>"),
                       ticks = FALSE,
                       min = -2, max = 2, value = c(-1, 1), step = 0.1),
-          # box(width = 6, title = HTML("&theta;<sub>S</sub> (aka \"decay\")"),
-          # status = "primary", solidHeader = TRUE,
           sliderInput("theta_t3", label = HTML("&theta;<sub>T</sub> (aka \"alpha\")"),
                       ticks = FALSE,
                       min = 0, max = 1, value = .25, step = 0.05)
@@ -240,8 +238,8 @@ gwespTab =
                       label = "Grid size",
                       choices = list("5 x 5" = 5
                                      , "9 x 9" = 9
-                                     # , "17 x 17" = 17
-                                     # , "31 x 31" = 31
+                                     , "17 x 17" = 17
+                                     , "31 x 31" = 31
                       ),
                       selected = 5),
           actionButton("goGWESP", label = strong("Simulate!"))
@@ -423,9 +421,9 @@ server =
     ##### Reactive density slider:
     observe({
       updateSliderInput(session, "density3",
-                        value = 4 / input$netSize,
+                        value = 4 / input$netSize3,
                         min = .001,
-                        max = round(10 / input$netSize, 2)
+                        max = round(10 / input$netSize3, 2)
       )
     })
 
