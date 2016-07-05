@@ -11,6 +11,8 @@ Depends:
     ggplot2,
     scales,
     dplyr,
+    tidyr,
+    gtools,
     shiny,
     shinydashboard
 License: MIT + file LICENSE

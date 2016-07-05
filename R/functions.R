@@ -3,7 +3,7 @@
 #' @return NULL Called for side-effect of launching shiny application
 #' @export
 #'
-#' @import ergm sna ggplot2 scales dplyr shiny shinydashboard
+#' @import ergm sna ggplot2 scales dplyr tidyr gtools shiny shinydashboard
 #' @importFrom grDevices topo.colors
 #' @importFrom graphics plot
 #'
