@@ -13,7 +13,7 @@ changeStatTab =
             at various decay-parameter (&theta;<sub>S</sub>) values.<br><br>
                The GWD statistic is given by:"),
                withMathJax("$$GWD(\\mathbf{y}, \\theta_s) = e^{\\theta_s} \\sum_{k=1}^{n-1}[1-(1-e^{-\\theta_s})^{k}]D_{k}(\\mathbf{y})$$"),
-               withMathJax("Where \\(\\mathbf{y}\\) is the network of \\(n\\) nodes, \\(D_{k}\\) of which have degree-\\(k\\), and \\(\\theta_s\\)
+               withMathJax("Where \\(\\mathbf{y}\\) is a network of \\(n\\) nodes, \\(D_{k}\\) of which have degree-\\(k\\), and \\(\\theta_s\\)
                       is a decay parameter that controls the severity of geometric weighting.
                       Noting that adding a half-edge to a node of degree-k, increments \\(D_{k+1}\\) and decrements \\(D_{k}\\), the change statistic is:"),
                withMathJax("$$\\delta GWD = (1 - e^{-\\theta_s})^k$$"),
@@ -51,13 +51,13 @@ degDistTab =
   tabItem(
     tabName = "degdist",
     h2("Parameter & Degree Distribution"),
-    HTML("The two networks plotted below have the same number of nodes and edges,
-             but the purple one is a random network (all edges equiprobable),
+    HTML("The two networks plotted below are the same size and density. The purple
+             one is a random network (all edges equiprobable),
             and the blue one is simulated with the
              selected GWD parameter and decay values. Adjust the sliders and click
             \"Simulate!\" to see how the blue
              network changes relative to the baseline of the purple one.<br><br>
-             The histograms at right are average degree distributions from multiple
+             The boxplots at right show the degree distributions from multiple
              networks simulated the same way as the plotted networks. You can examine
             degree centralization directly as a response to parameter values in the
             \"Centralization, Clustering, & GWESP\" tab at left."),
