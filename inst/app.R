@@ -12,12 +12,15 @@ changeStatTab =
           HTML("Plot the change to the GWD statistic for adding a half-edge to a node of given degree,
             at various decay-parameter (&theta;<sub>S</sub>) values.<br><br>
                The GWD statistic is given by:"),
-               withMathJax("$$GWD(\\mathbf{y}, \\theta_s) = e^{\\theta_s} \\sum_{k=1}^{n-1}[1-(1-e^{-\\theta_s})^{k}]D_{k}(\\mathbf{y})$$"),
-               withMathJax("Where \\(\\mathbf{y}\\) is a network of \\(n\\) nodes, \\(D_{k}\\) of which have degree-\\(k\\), and \\(\\theta_s\\)
+          withMathJax("$$GWD(\\mathbf{y}, \\theta_s) = e^{\\theta_s} \\sum_{k=1}^{n-1}[1-(1-e^{-\\theta_s})^{k}]D_{k}(\\mathbf{y})$$"),
+          withMathJax("Where \\(\\mathbf{y}\\) is a network of \\(n\\) nodes, \\(D_{k}\\) of which have degree-\\(k\\), and \\(\\theta_s\\)
                       is a decay parameter that controls the severity of geometric weighting.
                       Noting that adding a half-edge to a node of degree-k, increments \\(D_{k+1}\\) and decrements \\(D_{k}\\), the change statistic is:"),
-               withMathJax("$$\\delta GWD = (1 - e^{-\\theta_s})^k$$"),
-          tags$br(), tags$br(),
+          withMathJax("$$\\delta GWD = (1 - e^{-\\theta_s})^k$$"),
+          withMathJax("\\(\\theta_s < 0\\) makes GWD hard to interpret, and when \\(\\theta_s < -ln(2)\\)
+                      GWD becomes poorly behaved. This is not an error; rather, \\(\\theta_s\\) should probably
+                      always be non-negative."),
+            tags$br(), tags$br(),
 
           fluidRow(
             column(width = 5,
@@ -131,14 +134,13 @@ gwespTab =
           status = "primary", solidHeader = TRUE,
           sliderInput("netSize3",
                       label = "Number of Nodes", ticks = FALSE,
-                      min = 20, max = 500,
-                      value = 50, step = 5),
+                      min = 20, max = 1e3,
+                      value = 100, step = 5),
           sliderInput("density3",
                       label = "Network Density", ticks = FALSE,
                       min = .001, max = .2,
-                      value = 4 / 50,
+                      value = .04,
                       step = .001)
-
       ),
 
       box(width = 3, title = "GWDegree Parameters",
@@ -369,7 +371,8 @@ server =
                              gridSize = as.integer(input$gridSize),
                              nsim = as.integer(input$reps3),
                              netSize = input$netSize3,
-                             density = input$density3)
+                             density = input$density3) %>%
+          gwdegree:::plotHeatmaps()
       })
     })
     output$centHeatmap = renderPlot(heatmaps()$cent)

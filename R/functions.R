@@ -48,38 +48,37 @@ plotNet = function(net, vCol, mtext) {
   mtext(mtext, cex = 1.5)
 }
 
+
 simCCCent = function(gwdRange = c(-2, 2), gwespRange = c(-.5, .5),
                      theta_s = 1.5, theta_t = .5, gridSize = 3, nsim = 1,
                      netSize = 100, density = .02) {
-
+  # Simulate GWDxGWESP-grid of networks and measure centralization and clustering
+  # Returns a data.frame with one row for each cell in the grid (ie gridSize^2 rows). Four columns: gwd and gwesp parameter values from which the networks were simulated, and measured centralization and clustering coefficient (mean if nsim > 1) of each network.
   dfForSim = expand.grid(
     gwd = seq(gwdRange[1], gwdRange[2], len = gridSize),
     gwesp = seq(gwespRange[1], gwespRange[2], len = gridSize))
 
   N = network(netSize, density = density, directed = FALSE)
 
-  dfForSim =
-    lapply(1:nrow(dfForSim), function(i) {
-      n = simulate.formula(N ~ gwdegree(theta_s, TRUE) + gwesp(theta_t, TRUE),
-                           coef = unlist(dfForSim[i, ]),
-                           constraints = ~ edges,
-                           nsim = nsim)
-      data.frame(
-        Centralization = mean(centralization(n, 'degree', mode = 'graph')),
-        ClusteringCoef = mean(clusteringCoef(n))
-      )
-    }) %>%
+  lapply(1:nrow(dfForSim), function(i) {
+    n = simulate.formula(N ~ gwdegree(theta_s, TRUE) + gwesp(theta_t, TRUE),
+                         coef = unlist(dfForSim[i, ]),
+                         constraints = ~ edges,
+                         nsim = nsim)
+    data.frame(
+      Centralization = mean(centralization(n, 'degree', mode = 'graph')),
+      ClusteringCoef = mean(clusteringCoef(n))
+    )
+  }) %>%
     do.call(rbind, .) %>%
     cbind(dfForSim, .)
-
-  plotHeatmaps(dfForSim)
-
 }
 
 clusteringCoef = function(net)
   unname(3 * summary(net ~ triangles) / summary(net ~ twopath))
 
 plotHeatmaps = function(df) {
+  # Plot grid heat maps of centralization and clustering. df is of the structure produced by simCCCent.
   list(
     cent =
       ggplot(df, aes(x = gwd, y = gwesp, fill = Centralization)) +
