@@ -17,7 +17,7 @@ authors:
 
 # Summary
 
-Exponential random graph models (ERGMs) are maximum entropy statistical models that provide estimates on network tie formation of variables both exogenous (covariate) and endogenous (structural) to a network. Network centralization -- the tendency for edges to accrue among a small number of popular nodes -- is a key network variable in many fields, and in ERGMs it is primarily modeled via the geometrically-weighted degree (GWD) statistic [@snijders_new_2006; @hunter_curved_2007]. However, the published literature is ambiguous about how to interpret GWD estimates. This Shiny application seeks to relieve this ambiguity by demonstrating:
+Exponential random graph models (ERGMs) are maximum entropy statistical models that provide estimates on network tie formation of variables both exogenous (covariate) and endogenous (structural) to a network. Network centralization -- the tendency for edges to accrue among a small number of popular nodes -- is a key network variable in many fields, and in ERGMs it is primarily modeled via the geometrically-weighted degree (GWD) statistic [@snijders_new_2006; @hunter_curved_2007]. However, the published literature is ambiguous about how to interpret GWD estimates, and there is little guidance on how to interpret or fix values of the GWD shape-parameter, $\theta_S$. This Shiny application seeks to relieve this ambiguity by demonstrating:
 
 1. how the GWD statistic responds to adding edges to nodes of various degrees, contingent on the value of the shape parameter, $\theta_S$;
 

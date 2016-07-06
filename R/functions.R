@@ -1,3 +1,5 @@
+utils::globalVariables(".")  # For the magrittr pipe to circumvent cran-check note
+
 #' Run GW-Degree Shiny Application
 #'
 #' @return NULL Called for side-effect of launching shiny application
@@ -6,6 +8,10 @@
 #' @import ergm sna ggplot2 scales dplyr tidyr gtools shiny shinydashboard
 #' @importFrom grDevices topo.colors
 #' @importFrom graphics plot
+#' @importFrom network network.size
+#' @importFrom network network
+#' @importFrom magrittr "%>%"
+#' @importFrom stats rbinom
 #'
 #' @examples
 #' \dontrun{
@@ -17,7 +23,7 @@ gwdegree <- function() {
 }
 
 plotDeltaGWD = function(d, cols) {
-  ggplot(d, aes(x = degree, y = delta_GWD, color = as.factor(theta_s))) +
+  ggplot(d, aes_(x = ~degree, y = ~delta_GWD, color = ~as.factor(theta_s))) +
     geom_line(size = 1) +
     ylab(expression(paste(delta, ' GWD'))) +
     xlab('Node degree') +
@@ -43,7 +49,7 @@ plotNet = function(net, vCol, mtext) {
        edge.col = 'gray',
        vertex.border = 'white',
        vertex.lwd = .35,
-       vertex.cex = 4 - log10(network.size(net))
+       vertex.cex = 4 - log10(network::network.size(net))
   )
   mtext(mtext, cex = 1.5)
 }
@@ -58,7 +64,7 @@ simCCCent = function(gwdRange = c(-2, 2), gwespRange = c(-.5, .5),
     gwd = seq(gwdRange[1], gwdRange[2], len = gridSize),
     gwesp = seq(gwespRange[1], gwespRange[2], len = gridSize))
 
-  N = network(netSize, density = density, directed = FALSE)
+  N = makeNetwork(netSize, density)
 
   lapply(1:nrow(dfForSim), function(i) {
     n = simulate.formula(N ~ gwdegree(theta_s, TRUE) + gwesp(theta_t, TRUE),
@@ -66,7 +72,7 @@ simCCCent = function(gwdRange = c(-2, 2), gwespRange = c(-.5, .5),
                          constraints = ~ edges,
                          nsim = nsim)
     data.frame(
-      Centralization = mean(centralization(n, 'degree', mode = 'graph')),
+      Centralization = mean(sna::centralization(n, 'degree', mode = 'graph')),
       ClusteringCoef = mean(clusteringCoef(n))
     )
   }) %>%
@@ -77,23 +83,34 @@ simCCCent = function(gwdRange = c(-2, 2), gwespRange = c(-.5, .5),
 clusteringCoef = function(net)
   unname(3 * summary(net ~ triangles) / summary(net ~ twopath))
 
+makeNetwork = function(nSize, nDensity) {
+  # Same as ergm::as.network.numeric, but doesn't create note on R CMD check
+  m = matrix(rep(0, nSize^2), nrow = nSize)
+  m[upper.tri(m)] = rbinom((nSize ^ 2 - nSize)/ 2 , 1, nDensity)
+  network::network(m, directed = FALSE)
+}
+
 plotHeatmaps = function(df) {
   # Plot grid heat maps of centralization and clustering. df is of the structure produced by simCCCent.
   list(
     cent =
-      ggplot(df, aes(x = gwd, y = gwesp, fill = Centralization)) +
+      ggplot(df, aes_(x = ~gwd, y = ~gwesp, fill = ~Centralization)) +
       geom_raster(alpha = .7) +
       scale_fill_gradientn(colours = topo.colors(1e3), name = "") +
       xlab(expression(theta[GWD])) +
       ylab(expression(theta[GWESP])) +
-      theme(aspect.ratio = 1),
+      theme(aspect.ratio = 1,
+            panel.grid.major = element_blank(),
+            panel.grid.minor = element_blank()),
 
     cc =
-      ggplot(df, aes(x = gwd, y = gwesp, fill = ClusteringCoef)) +
+      ggplot(df, aes_(x = ~gwd, y = ~gwesp, fill = ~ClusteringCoef)) +
       geom_raster(alpha = .7) +
       scale_fill_gradientn(colours = topo.colors(1e3), name = "") +
       xlab(expression(theta[GWD])) +
       ylab(expression(theta[GWESP])) +
-      theme(aspect.ratio = 1)
+      theme(aspect.ratio = 1,
+            panel.grid.major = element_blank(),
+            panel.grid.minor = element_blank())
   )
 }

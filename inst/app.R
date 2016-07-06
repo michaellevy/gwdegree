@@ -1,3 +1,5 @@
+utils::globalVariables(".")  # For the magrittr pipe to circumvent cran-check note
+
 # colors
 gwdDecayOptions = list(3, 2, 1, .5, 0, -.5, -1)
 cols = structure(rev(RColorBrewer::brewer.pal(length(gwdDecayOptions) + 2, 'BuPu')[-1:-2]),
@@ -15,11 +17,10 @@ changeStatTab =
           withMathJax("$$GWD(\\mathbf{y}, \\theta_s) = e^{\\theta_s} \\sum_{k=1}^{n-1}[1-(1-e^{-\\theta_s})^{k}]D_{k}(\\mathbf{y})$$"),
           withMathJax("Where \\(\\mathbf{y}\\) is a network of \\(n\\) nodes, \\(D_{k}\\) of which have degree-\\(k\\), and \\(\\theta_s\\)
                       is a decay parameter that controls the severity of geometric weighting.
-                      Noting that adding a half-edge to a node of degree-k, increments \\(D_{k+1}\\) and decrements \\(D_{k}\\), the change statistic is:"),
+                      Noting that adding a half-edge to a node of degree-k increments \\(D_{k+1}\\) and decrements \\(D_{k}\\), the change statistic is:"),
           withMathJax("$$\\delta GWD = (1 - e^{-\\theta_s})^k$$"),
-          withMathJax("\\(\\theta_s < 0\\) makes GWD hard to interpret, and when \\(\\theta_s < -ln(2)\\)
-                      GWD becomes poorly behaved. This is not an error; rather, \\(\\theta_s\\) should probably
-                      always be non-negative."),
+          withMathJax("Note that \\(\\theta_s < 0\\) makes GWD hard to interpret, and when \\(\\theta_s < -ln(2)\\),
+                      GWD becomes poorly behaved."),
             tags$br(), tags$br(),
 
           fluidRow(
@@ -60,7 +61,7 @@ degDistTab =
              selected GWD parameter and decay values. Adjust the sliders and click
             \"Simulate!\" to see how the blue
              network changes relative to the baseline of the purple one.<br><br>
-             The boxplots at right show the degree distributions from multiple
+             The boxplots at right show degree distributions from multiple
              networks simulated the same way as the plotted networks. You can examine
             degree centralization directly as a response to parameter values in the
             \"Centralization, Clustering, & GWESP\" tab at left."),
@@ -73,11 +74,11 @@ degDistTab =
           sliderInput("netSize",
                       label = "Number of Nodes", ticks = FALSE,
                       min = 20, max = 1e3,
-                      value = 100, step = 5),
+                      value = 50, step = 5),
           sliderInput("density",
                       label = "Network Density", ticks = FALSE,
                       min = .001, max = .2,
-                      value = .04,
+                      value = .08,
                       step = .001)
       ),
 
@@ -120,11 +121,10 @@ gwespTab =
     tabName = "gwesp",
     h2("Confoundedness of Centralization & Clustering"),
     HTML("Here you can examine how network centralization (the tendency for edges to
-        be concentrated on popular actors) and clustering (the tendency to form complete triangles)
+        be concentrated on popular actors) and clustering (the tendency for open two-paths to become closed triangles)
         respond across a range of both GWD- and GWESP-parameter values, their respective decay parameters, and network size and density.
         <br><br>
-        Note that these simulations are computationally expensive. Larger
-             and denser networks will take minutes for each replicate network."),
+        Note that these simulations are computationally expensive. Larger and denser networks or simulations on larger grids may take minutes for each replicate network."),
     tags$br(), tags$br(),
 
     # Inputs
@@ -135,11 +135,11 @@ gwespTab =
           sliderInput("netSize3",
                       label = "Number of Nodes", ticks = FALSE,
                       min = 20, max = 1e3,
-                      value = 100, step = 5),
+                      value = 50, step = 5),
           sliderInput("density3",
                       label = "Network Density", ticks = FALSE,
                       min = .001, max = .2,
-                      value = .04,
+                      value = .08,
                       step = .001)
       ),
 
@@ -257,14 +257,12 @@ server =
       reactive({
 
         input$goDD  # This button causes the reactive to update, but
-        # not all the isolated code that directly takes
-        # slider inputs below.
-
+        # not all the isolated code that directly takes slider inputs below.
 
         isolate({
           networks = vector('list', 2L)
           networks[[1]] = replicate(input$reps,
-                                    network(input$netSize, density = input$density, directed = FALSE),
+                                    gwdegree:::makeNetwork(input$netSize, density = input$density),
                                     simplify = FALSE)
           networks[[2]] =
             lapply(networks[[1]], function(basis) {  # To keep number edges same across types
@@ -287,10 +285,10 @@ server =
               do.call(gtools::smartbind, .) %>%
               tidyr::gather(degree, count) %>%
               # Need number of sims to join with correct number of 0s for degrees that never occur
-              mutate(.,
+              dplyr::mutate(.,
                      sim = rep(1:input$reps, length(unique(.$degree))),
                      degree = as.integer(degree)) %>%
-              arrange(degree)
+              dplyr::arrange(degree)
 
             # Where smartbind fills with NA, there were no nodes of that degree, so replace with zero:
             deg[is.na(deg)] = 0
@@ -333,7 +331,6 @@ server =
         geom_boxplot(position = position_dodge(width = .5),
                      alpha = .75, color = 'black') +
         ylab('Node Count') +
-        # xlab('Degree') +
         scale_x_discrete(name = "Degree",
                          breaks = seq(0, max(degDists()[["dd"]]$degree), by = 5)) +
         scale_fill_manual(values = netCols, name = 'Network',

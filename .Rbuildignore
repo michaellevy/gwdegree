@@ -1,6 +1,8 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
 .DS_Store
-^\*.png$
+qrcode.png$
 .httr-oauth
-paper\*
+^paper/.+$
+.travis.yml
+removedInterprativeText.txt

@@ -1,22 +1,25 @@
 Package: gwdegree
 Title: Interpretation of Geometrically-Weighted Degree Estimates in Exponential
     Random Graph Models
-Version: 0.0.0.9000
+Version: 0.1.0
 Authors@R: person("Michael", "Levy", email = "malevy@ucdavis.edu", role = c("aut", "cre"))
-Description: This package is the distribution form of the gwdegree Shiny application. Geometrically-weighted degree is a common term in exponential random graph models, but the meaning of its estimates are poorly understood. This application is meant to help alleviate that problem by providing intuition It is meant to provide some intuition on 1) the behavior of the GW
+License: MIT + file LICENSE
+Description: This is a Shiny application intended to provide better understanding of how geometrically-weighted degree terms in exponential random graph models function.
 Depends:
     R (>= 3.2.3),
     ergm,
-    sna,
     ggplot2,
-    scales,
-    dplyr,
-    tidyr,
-    gtools,
     shiny,
     shinydashboard
-License: MIT + file LICENSE
+Imports:
+    dplyr,
+    gtools,
+    magrittr,
+    network,
+    scales,
+    sna,
+    tidyr
+Suggests: testthat
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 5.0.1
-Suggests: testthat
