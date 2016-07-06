@@ -1,6 +1,7 @@
 ## Geometrically Weighted Degree
 
 ![travis badge](https://travis-ci.org/michaellevy/gwdegree.svg?branch=master)
+[![CRAN_Status_Badge](http://www.r-pkg.org/badges/version/gwdegree)](https://cran.r-project.org/package=gwdegree)
 
 There is ambiguity and confusion in the research community about how to interpret GWDegree estimates in exponential random graph models (ERGMs). This app aims to help by providing an interactive platform that demonstrates:
 
