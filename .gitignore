@@ -8,3 +8,5 @@ tmp_eg.R
 .httr-oauth
 rsconnect/
 *.txt
+paper/*.html
+paper/*.pdf

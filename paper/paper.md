@@ -17,7 +17,7 @@ authors:
 
 # Summary
 
-Exponential random graph models (ERGMs) are maximum entropy statistical models that provide estimates on network tie formation of variables both exogenous (covariate) and endogenous (structural) to a network. Network centralization -- the tendency for edges to accrue among a small number of popular nodes -- is a key network variable in many fields, and in ERGMs it is primarily modeled via the geometrically-weighted degree (GWD) statistic [@snijders_new_2006; @hunter_curved_2007]. However, the published literature is ambiguous about how to interpret GWD estimates, and there is little guidance on how to interpret or fix values of the GWD shape-parameter, $\theta_S$. This Shiny application seeks to relieve this ambiguity by demonstrating:
+Exponential random graph models (ERGMs) are maximum entropy statistical models that provide estimates on network tie formation of variables both exogenous (covariate) and endogenous (structural) to a network. Network centralization -- the tendency for edges to accrue among a small number of popular nodes -- is a key network variable in many fields, and in ERGMs it is primarily modeled via the geometrically-weighted degree (GWD) statistic [@snijders_new_2006; @hunter_curved_2007]. However, the published literature is ambiguous about how to interpret GWD estimates, and there is little guidance on how to interpret or fix values of the GWD shape-parameter, $\theta_S$. This Shiny application seeks to improve the use of GWD in ERGMs by demonstrating:
 
 1. how the GWD statistic responds to adding edges to nodes of various degrees, contingent on the value of the shape parameter, $\theta_S$;
 
@@ -25,6 +25,10 @@ Exponential random graph models (ERGMs) are maximum entropy statistical models t
 
 1. how GWD and GWESP -- an ERGM term used to model triadic closure -- interact to affect network centralization and clustering.
 
-The application is bundled as an R package and can be launched by installing and attaching the `gwdegree` package and running the `gwdegree()` function.
+### Use
+
+The application is [available online](https://michaellevy.shinyapps.io/gwdegree/), but with conservative simulation limits and limited bandwidth. It is also bundled as an R package that can be launched by installing the `gwdegree` package from CRAN (`install.packages("gwdegree")`), attaching the package (`library(gwdegree)`), and running the app (`gwdegree()`). Pull requests, feature suggestions, and other feedback is welcome at [https://github.com/michaellevy/gwdegree](https://github.com/michaellevy/gwdegree). 
+
+The app has three tabs, which correspond to the three functionalities described above. Researchers trying to choose a $\theta_S$ value or interpret a $\theta_{GWD}$ estimate may find the second tab especially useful by setting the network size and density to match the observed network and exploring the influence of the two parameters on the shape of the degree distribution.
 
 # References
