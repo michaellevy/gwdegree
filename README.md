@@ -1,5 +1,7 @@
 ## Geometrically Weighted Degree
 
+![travis badge](https://travis-ci.org/michaellevy/gwdegree.svg?branch=master)
+
 There is ambiguity and confusion in the research community about how to interpret GWDegree estimates in exponential random graph models (ERGMs). This app aims to help by providing an interactive platform that demonstrates:
 
 1. how the GWD statistic responds to adding edges to nodes of various degrees, contingent on the value of the shape parameter, $\theta_S$;
