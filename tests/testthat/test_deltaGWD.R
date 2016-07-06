@@ -5,7 +5,7 @@ test_that("Deleting an edge: deltaGWD() matches simulation-based calculation for
           {
             decay = runif(1, 0, 3)
             repeat ({  # Make sure we have an edge that is present
-              n = network(sample(2:50, 1), density = runif(1, .01, .5), directed = FALSE)
+              n = network(sample(5:50, 1), density = runif(1, .01, .5), directed = FALSE)
               nodesToAdd = sample(network.size(n), 2, replace = FALSE)
               if (n[nodesToAdd[1], nodesToAdd[2]])
                 break
@@ -25,7 +25,7 @@ test_that("Adding an edge: deltaGWD() matches simulation-based calculation for a
           {
             decay = runif(1, 0, 3)
             repeat ({  # Make sure we do not have an edge that is present
-              n = network(sample(2:50, 1), density = runif(1, .01, .5), directed = FALSE)
+              n = network(sample(5:50, 1), density = runif(1, .01, .5), directed = FALSE)
               nodesToAdd = sample(network.size(n), 2, replace = FALSE)
               if (!n[nodesToAdd[1], nodesToAdd[2]])
                 break
