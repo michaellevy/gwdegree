@@ -1,5 +1,5 @@
 ---
-title: 'gwdegree: A Shiny app to aid interpretation of geometrically-weighted degree
+title: 'gwdegree: Improving interpretation of geometrically-weighted degree
   estimates in exponential random graph models'
 bibliography: paper.bib
 date: "05 July 2016"
