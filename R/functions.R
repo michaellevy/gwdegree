@@ -5,13 +5,13 @@ utils::globalVariables(".")  # For the magrittr pipe to circumvent cran-check no
 #' @return NULL Called for side-effect of launching shiny application
 #' @export
 #'
-#' @import ergm sna ggplot2 scales dplyr tidyr gtools shiny shinydashboard
+#' @import ergm sna ggplot2 magrittr scales dplyr gtools shiny shinydashboard
 #' @importFrom grDevices topo.colors
 #' @importFrom graphics plot
 #' @importFrom network network.size
 #' @importFrom network network
-#' @importFrom magrittr "%>%"
 #' @importFrom stats rbinom
+#' @importFrom tidyr gather
 #'
 #' @examples
 #' \dontrun{
@@ -66,18 +66,25 @@ simCCCent = function(gwdRange = c(-2, 2), gwespRange = c(-.5, .5),
 
   N = makeNetwork(netSize, density)
 
-  lapply(1:nrow(dfForSim), function(i) {
-    n = simulate.formula(N ~ gwdegree(theta_s, TRUE) + gwesp(theta_t, TRUE),
-                         coef = unlist(dfForSim[i, ]),
-                         constraints = ~ edges,
-                         nsim = nsim)
-    data.frame(
-      Centralization = mean(sna::centralization(n, 'degree', mode = 'graph')),
-      ClusteringCoef = mean(clusteringCoef(n))
-    )
-  }) %>%
-    do.call(rbind, .) %>%
-    cbind(dfForSim, .)
+  cbind(dfForSim,
+        do.call(rbind,
+                lapply(1:nrow(dfForSim), function(i) {
+                  n = simulate.formula(N ~ gwdegree(theta_s, TRUE) + gwesp(theta_t, TRUE),
+                                       coef = unlist(dfForSim[i, ]),
+                                       constraints = ~ edges,
+                                       nsim = nsim)
+                  data.frame(
+                    Centralization = mean(degCent(n)),
+                    ClusteringCoef = mean(clusteringCoef(n))
+                  )
+                })
+        )
+  )
+}
+
+degCent = function(n) {
+  degs = sna::degree(n)
+  sum(abs(max(degs) - degs)) / sna::degree(n, tmaxdev = TRUE)
 }
 
 clusteringCoef = function(net)

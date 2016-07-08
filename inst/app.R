@@ -222,11 +222,7 @@ ui = dashboardPage(header, sidebar, body)
 server =
   shinyServer(function(input, output, session) {
 
-    # lapply(c('ergm', 'network', 'sna', 'ggplot2', 'dplyr', 'scales', 'magrittr'),
-    #        require, char = TRUE)
-    # source("../R/functions.R")
     theme_set(theme_bw(base_size = 20))
-
 
     ### Change-statistic plot  ####
     deltaGWDdf = reactive({
@@ -262,7 +258,7 @@ server =
         isolate({
           networks = vector('list', 2L)
           networks[[1]] = replicate(input$reps,
-                                    gwdegree:::makeNetwork(input$netSize, density = input$density),
+                                    gwdegree:::makeNetwork(input$netSize, input$density),
                                     simplify = FALSE)
           networks[[2]] =
             lapply(networks[[1]], function(basis) {  # To keep number edges same across types
@@ -279,7 +275,7 @@ server =
             # type is stack of simulated graphs of a particular type
             # Split into each simulation, tabulate degrees, and use `smartbind` to match on names (ie, degree)
             deg =
-              degree(networks[[type]], g = 1:length(networks[[type]]), gmode = 'graph') %>%
+              sna::degree(networks[[type]], g = 1:length(networks[[type]]), gmode = 'graph') %>%
               split(., 1:ncol(.)) %>%
               lapply(table) %>%
               do.call(gtools::smartbind, .) %>%
@@ -294,15 +290,10 @@ server =
             deg[is.na(deg)] = 0
             deg$type = names(networks[type])
 
-            list(deg = deg,
-                 var = data.frame(
-                   type = names(networks)[type],
-                   var = mean(sapply(networks[[type]], function(n) var(degree(n, gmode = 'graph'))))
-                 ))
+            deg
           })
 
-          vari = do.call(rbind, lapply(dd, "[[", "var"))
-          deg = do.call(rbind, lapply(dd, "[[", "deg"))
+          deg = do.call(rbind, dd)
 
           # Fill in the degrees-never-found to keep box-widths constant
           filled = expand.grid(
@@ -316,15 +307,13 @@ server =
           filled$type = factor(filled$type, levels = sort(unique(filled$type), decreasing = TRUE))
         })
 
-        list(dd = filled, variance = vari, random = networks[[1]][[1]], gwd = networks[[2]][[1]])
+      list(dd = filled, random = networks[[1]][[1]], gwd = networks[[2]][[1]])
 
 
       })
 
     #### Plot degree distributions ####
 
-    # Pretty the x-axis labels and get outlier points colored
-    # And add average variance
     output$degDistPlot = renderPlot({
 
       ggplot(degDists()[["dd"]], aes(x = factor(degree), y = count, fill = type)) +
