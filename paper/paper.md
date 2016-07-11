@@ -25,10 +25,5 @@ Exponential random graph models (ERGMs) are maximum entropy statistical models t
 
 1. how GWD and GWESP -- an ERGM term used to model triadic closure -- interact to affect network centralization and clustering.
 
-### Use
-
-The application is [available online](https://michaellevy.shinyapps.io/gwdegree/), but with conservative simulation limits and limited bandwidth. It is also bundled as an R package that can be launched by installing the `gwdegree` package from CRAN (`install.packages("gwdegree")`), attaching the package (`library(gwdegree)`), and running the app (`gwdegree()`). Pull requests, feature suggestions, and other feedback is welcome at [https://github.com/michaellevy/gwdegree](https://github.com/michaellevy/gwdegree). 
-
-The app has three tabs, which correspond to the three functionalities described above. Researchers trying to choose a $\theta_S$ value or interpret a $\theta_{GWD}$ estimate may find the second tab especially useful by setting the network size and density to match the observed network and exploring the influence of the two parameters on the shape of the degree distribution.
 
 # References
