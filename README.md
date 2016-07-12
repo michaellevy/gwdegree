@@ -1,7 +1,6 @@
 # Geometrically Weighted Degree
 
-![travis badge](https://travis-ci.org/michaellevy/gwdegree.svg?branch=master)
-[![CRAN_Status_Badge](http://www.r-pkg.org/badges/version/gwdegree)](https://cran.r-project.org/package=gwdegree)
+![travis badge](https://travis-ci.org/michaellevy/gwdegree.svg?branch=master) [![CRAN_Status_Badge](http://www.r-pkg.org/badges/version/gwdegree)](https://cran.r-project.org/package=gwdegree) [![status](http://joss.theoj.org/papers/0f4eda35180f77176ce495cd4d711075/status.svg)](http://joss.theoj.org/papers/0f4eda35180f77176ce495cd4d711075)
 
 ### Overview
 
@@ -21,7 +20,7 @@ The application is available as a web-app [online](https://michaellevy.shinyapps
 
 To run the application from R, first attach the package with `library(gwdegree)`, then launch it with `gwdegree()`.
 
-The three functionalities described above are split into separate tabs in the application. Researchers trying to decide whether to estimate or fix the shape parameter value, how to choose or interpret the shape parameter value, or how to interpret the GWD parameter value may find the second tab, "Parameter & Degree Distribution" especially useful by setting the network size and density to match the observed network and exploring the influence of the two parameters on the shape of the degree distribution.
+The three functionalities described above are split into separate tabs in the application. Researchers trying to decide whether to estimate or fix the shape parameter value, how to choose or interpret the shape parameter value, or how to interpret the GWD parameter value may find the second tab, "Parameter & Degree Distribution", especially useful by setting the network size and density to match the observed network and exploring the influence of the two parameters on the shape of the degree distribution.
 
 ### Feedback, questions, and contributions
 
